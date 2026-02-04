@@ -13,20 +13,24 @@ export default function EventList({ onImport }) {
     loadEvents();
   }, [filters, showAll]);
 
-  const loadEvents = async () => {
-    setLoading(true);
-    try {
-      const response = showAll
-        ? await eventsAPI.getAllEvents(filters)
-        : await eventsAPI.getPublicEvents(filters);
+const loadEvents = async () => {
+  setLoading(true);
+  try {
+    const response = showAll
+      ? await eventsAPI.getAllEvents(filters)
+      : await eventsAPI.getPublicEvents(filters);
 
-      setEvents(response.data.events);
-    } catch (error) {
-      console.error("Failed to load events:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    // ✅ ALWAYS an array
+    setEvents(response.data?.events ?? []);
+  } catch (error) {
+    console.error("Failed to load events:", error);
+
+    // optional UX improvement
+    setEvents([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
