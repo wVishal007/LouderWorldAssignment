@@ -20,15 +20,14 @@ export default function EventList({ onImport }) {
         ? await eventsAPI.getAllEvents(filters)
         : await eventsAPI.getPublicEvents(filters);
 
-      setEvents(response.data);
-      console.log(response.data);
+      setEvents(response.data.events);
     } catch (error) {
       console.error("Failed to load events:", error);
     } finally {
       setLoading(false);
     }
   };
-  
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Hero */}
