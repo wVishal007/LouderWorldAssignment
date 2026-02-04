@@ -3,7 +3,6 @@ import express from "express";
 import session from "express-session";
 import passport from "passport";
 import cors from "cors";
-
 import "./config/passport.js";
 import connectDB from "./config/db.js";
 
