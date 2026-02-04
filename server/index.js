@@ -14,16 +14,19 @@ import authRoutes from "./routes/auth.route.js";
 const app = express();
 
 /* ============================
-   ENV & PORT
+   BASIC CONFIG
    ============================ */
 const PORT = process.env.PORT || 3000;
 const FRONTEND_URL = process.env.FRONTEND_URL;
 
 /* ============================
-   MIDDLEWARES
+   TRUST PROXY (REQUIRED ON RENDER)
    ============================ */
+app.set("trust proxy", 1);
 
-// 🔥 CORS (VERY IMPORTANT for sessions)
+/* ============================
+   CORS (CRITICAL)
+   ============================ */
 app.use(
   cors({
     origin: FRONTEND_URL,
@@ -34,18 +37,18 @@ app.use(
 app.use(express.json());
 
 /* ============================
-   SESSION CONFIG
+   SESSION (PRODUCTION SAFE)
    ============================ */
 app.use(
   session({
     name: "louderworld.sid",
-    secret: process.env.SESSION_SECRET || "event-secret",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // true only on HTTPS (Render / Prod)
-      sameSite: "lax",
+      secure: true,        // ✅ REQUIRED (HTTPS)
+      sameSite: "none",    // ✅ REQUIRED (cross-site)
       maxAge: 1000 * 60 * 60 * 24, // 1 day
     },
   })
@@ -76,9 +79,9 @@ app.get("/", (req, res) => {
    ============================ */
 connectDB()
   .then(() => {
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-    });
+    app.listen(PORT, () =>
+      console.log(`🚀 Server running on port ${PORT}`)
+    );
   })
   .catch((err) => {
     console.error("❌ DB connection failed", err);
