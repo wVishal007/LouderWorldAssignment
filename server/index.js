@@ -13,20 +13,15 @@ import authRoutes from "./routes/auth.route.js";
 
 const app = express();
 
-/* ============================
-   BASIC CONFIG
-   ============================ */
+/* 🔥 REQUIRED FOR RENDER + HTTPS */
+app.set("trust proxy", 1);
+
 const PORT = process.env.PORT || 3000;
 const FRONTEND_URL = process.env.FRONTEND_URL;
 
 /* ============================
-   TRUST PROXY (REQUIRED ON RENDER)
-   ============================ */
-app.set("trust proxy", 1);
-
-/* ============================
-   CORS (CRITICAL)
-   ============================ */
+   CORS
+============================ */
 app.use(
   cors({
     origin: FRONTEND_URL,
@@ -37,8 +32,8 @@ app.use(
 app.use(express.json());
 
 /* ============================
-   SESSION (PRODUCTION SAFE)
-   ============================ */
+   SESSION (FIXED)
+============================ */
 app.use(
   session({
     name: "louderworld.sid",
@@ -47,42 +42,35 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,        // ✅ REQUIRED (HTTPS)
-      sameSite: "none",    // ✅ REQUIRED (cross-site)
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      secure: true,      // 🔥 MUST be true on Render
+      sameSite: "none",  // 🔥 MUST for cross-site
+      maxAge: 1000 * 60 * 60 * 24,
     },
   })
 );
 
 /* ============================
    PASSPORT
-   ============================ */
+============================ */
 app.use(passport.initialize());
 app.use(passport.session());
 
 /* ============================
    ROUTES
-   ============================ */
+============================ */
 app.use("/api/events", eventsRoutes);
 app.use("/api/leads", leadsRoutes);
 app.use("/auth", authRoutes);
 
-/* ============================
-   HEALTH CHECK
-   ============================ */
 app.get("/", (req, res) => {
   res.json({ status: "Server running 🚀" });
 });
 
 /* ============================
-   START SERVER
-   ============================ */
-connectDB()
-  .then(() => {
-    app.listen(PORT, () =>
-      console.log(`🚀 Server running on port ${PORT}`)
-    );
-  })
-  .catch((err) => {
-    console.error("❌ DB connection failed", err);
-  });
+   START
+============================ */
+connectDB().then(() => {
+  app.listen(PORT, () =>
+    console.log(`🚀 Server running on ${PORT}`)
+  );
+});

@@ -1,5 +1,4 @@
 import passport from "passport";
-import "dotenv/config"
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import User from "../models/user.model.js";
 
@@ -8,7 +7,8 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL:`${process.env.BACKEND_URL}/auth/google/callback`
+      callbackURL:
+        "https://louderworldassignment-guqz.onrender.com/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -19,7 +19,7 @@ passport.use(
             googleId: profile.id,
             name: profile.displayName,
             email: profile.emails[0].value,
-            avatar: profile.photos[0].value
+            avatar: profile.photos?.[0]?.value,
           });
         }
 
@@ -31,17 +31,11 @@ passport.use(
   )
 );
 
-/* 🔐 Serialize user to session */
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
-/* 🔓 Deserialize user from session */
 passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findById(id);
-    done(null, user);
-  } catch (err) {
-    done(err, null);
-  }
+  const user = await User.findById(id);
+  done(null, user);
 });

@@ -7,20 +7,32 @@ router.get(
   "/google",
   passport.authenticate("google", {
     scope: ["profile", "email"],
+    prompt: "select_account",
   })
 );
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { failureRedirect: "/login" }),
+  passport.authenticate("google", {
+    failureRedirect: "/auth/failed",
+    session: true,
+  }),
   (req, res) => {
     res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
   }
 );
 
+router.get("/failed", (req, res) => {
+  res.status(401).json({ message: "Google auth failed" });
+});
+
 router.post("/logout", (req, res) => {
   req.logout(() => {
-    res.clearCookie("connect.sid");
+    res.clearCookie("louderworld.sid", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
     res.json({ message: "Logged out" });
   });
 });
