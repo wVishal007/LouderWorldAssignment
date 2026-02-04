@@ -10,8 +10,16 @@ import ScrapeLogs from "./pages/ScrapeLogs";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import ErrorBoundary from "./components/layout/ErrorBoundary";
+import { useDispatch } from "react-redux";
+import { fetchUser } from "./slices/authSlice";
 
 function ProtectedRoute({ children }) {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchUser());
+  }, [dispatch]);
+
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -42,8 +50,13 @@ export default function App() {
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Home />} />
-              <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
-              
+              <Route
+                path="/login"
+                element={
+                  user ? <Navigate to="/dashboard" replace /> : <Login />
+                }
+              />
+
               {/* Protected Routes */}
               <Route
                 path="/dashboard"
@@ -69,7 +82,7 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
-              
+
               {/* 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>

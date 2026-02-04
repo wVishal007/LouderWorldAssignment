@@ -12,27 +12,29 @@ import authRoutes from "./routes/auth.route.js";
 
 const app = express();
 
-/* 🔥 REQUIRED FOR RENDER + HTTPS */
+/* 🔥 REQUIRED FOR RENDER */
 app.set("trust proxy", 1);
 
 const PORT = process.env.PORT || 3000;
 const FRONTEND_URL = process.env.FRONTEND_URL;
 
 /* ============================
-   CORS
+   CORS (STRICT)
 ============================ */
 app.use(
   cors({
-    origin: FRONTEND_URL,
+    origin: FRONTEND_URL, // MUST be exact Vercel URL
     credentials: true,
   })
 );
+const isProd = process.env.NODE_ENV === "production";
 
 app.use(express.json());
 
 /* ============================
-   SESSION (FIXED)
+   SESSION (FINAL FIX)
 ============================ */
+
 app.use(
   session({
     name: "louderworld.sid",
@@ -41,13 +43,12 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,      // 🔥 MUST be true on Render
-      sameSite: "none",  // 🔥 MUST for cross-site
+      secure: isProd,          // ✅ only true in production
+      sameSite: isProd ? "none" : "lax",
       maxAge: 1000 * 60 * 60 * 24,
     },
   })
 );
-
 /* ============================
    PASSPORT
 ============================ */

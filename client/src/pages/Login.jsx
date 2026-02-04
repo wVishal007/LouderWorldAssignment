@@ -1,6 +1,9 @@
+import { useDispatch } from "react-redux";
 import { authAPI } from "../services/api";
 
 export default function Login() {
+  const dispatch = useDispatch();
+  
   const handleLogin = () => {
     authAPI.login(); // browser redirect
   };
