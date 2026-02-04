@@ -19,7 +19,6 @@ export default function EventList({ onImport }) {
 setEvents(response.data);
 console.log(response.data);
       
-      setEvents(response.data);
     } catch (error) {
       console.error('Failed to load events:', error);
     } finally {

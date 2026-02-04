@@ -11,25 +11,42 @@ router.get("/", async (req, res) => {
   try {
     const { city, search } = req.query;
 
+    // ✅ Fix timezone issue – start of today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     let query = {
-      status: { $ne: "inactive" },
-      dateTime: { $gte: new Date() },
+      status: { $ne: "inactive" }, // exclude inactive
+      dateTime: { $gte: today },   // today + future
     };
 
-    if (city) query.city = city;
+    // ✅ City filter (case-insensitive, space-safe)
+    if (city && city.trim() !== "") {
+      query.city = {
+        $regex: `^${city.trim()}$`,
+        $options: "i",
+      };
+    }
 
-    if (search) {
+    // ✅ Search filter
+    if (search && search.trim() !== "") {
       query.$or = [
-        { title: new RegExp(search, "i") },
-        { description: new RegExp(search, "i") },
-        { venueName: new RegExp(search, "i") },
+        { title: { $regex: search.trim(), $options: "i" } },
+        { description: { $regex: search.trim(), $options: "i" } },
+        { venueName: { $regex: search.trim(), $options: "i" } },
       ];
     }
 
-    const events = await Event.find(query).sort({ dateTime: 1 });
-    res.json(events);
-  } catch (err) {
-    res.status(500).json({ message: "Failed to fetch events" });
+    const events = await Event.find(query)
+      .sort({ dateTime: 1 }) // earliest first
+      .lean();
+
+    res.status(200).json(events);
+  } catch (error) {
+    console.error("Fetch events error:", error);
+    res.status(500).json({
+      message: "Failed to fetch events",
+    });
   }
 });
 
@@ -38,11 +55,17 @@ router.get("/", async (req, res) => {
 ================================ */
 router.get("/dashboard", isAuthenticated, async (req, res) => {
   try {
-    const { city, status, search } = req.query;
+    const { city, status, search, startDate, endDate } = req.query;
     let query = {};
 
     if (city) query.city = city;
     if (status) query.status = status;
+
+    if (startDate || endDate) {
+      query.dateTime = {};
+      if (startDate) query.dateTime.$gte = new Date(startDate);
+      if (endDate) query.dateTime.$lte = new Date(endDate);
+    }
 
     if (search) {
       query.$or = [
