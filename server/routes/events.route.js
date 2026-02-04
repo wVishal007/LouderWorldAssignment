@@ -86,8 +86,33 @@ router.get("/dashboard", isAuthenticated, async (req, res) => {
 });
 
 /* ===============================
+   📥 IMPORT ALL EVENT
+================================ */
+
+router.get("/all", isAuthenticated, async (req, res) => {
+  const { page = 1, limit = 50 } = req.query;
+  const skip = (page - 1) * limit;
+
+  const events = await Event.find({})
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(Number(limit));
+
+  const total = await Event.countDocuments();
+
+  res.json({
+    events,
+    pagination: {
+      total,
+      page: Number(page),
+      pages: Math.ceil(total / limit),
+    },
+  });
+});
+/* ===============================
    📥 IMPORT EVENT
 ================================ */
+
 router.post("/:id/import", isAuthenticated, async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);

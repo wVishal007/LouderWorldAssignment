@@ -32,14 +32,22 @@ export const authAPI = {
 /* ============================
    🌍 PUBLIC EVENTS
 ============================ */
+/* ============================
+   🌍 EVENTS APIs
+============================ */
 export const eventsAPI = {
+  // 🌍 Public upcoming events
   getPublicEvents: (params) =>
     api.get("/api/events", { params }),
 
+  // 🔐 All events (admin / internal)
+  getAllEvents: (params) =>
+    api.get("/api/events/all", { params }),
+
+  // 🔎 Single event
   getEventById: (id) =>
     api.get(`/api/events/${id}`),
 };
-
 /* ============================
    🔐 DASHBOARD EVENTS
 ============================ */
