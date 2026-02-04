@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import ErrorBoundary from "./components/layout/ErrorBoundary";
 import { useDispatch } from "react-redux";
 import { fetchUser } from "./slices/authSlice";
+import { useEffect } from "react";
 
 function ProtectedRoute({ children }) {
   const dispatch = useDispatch();
